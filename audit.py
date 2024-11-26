@@ -57,7 +57,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def compile_pdfs(bot, chat_id) -> None:
     try:
         # Get today's date
-        today = datetime.now().strftime("%d%m%y")
+        today = datetime.utcnow() + timedelta(hours=8).strftime("%d%m%y")
 
         # Find all PDF files for today in the specified directory
         pdf_files = glob.glob(os.path.join(PDF_DIRECTORY, f"W-{today}-*.pdf"))
@@ -95,7 +95,7 @@ def schedule_compile_pdfs(application, chat_id):
             await asyncio.sleep(wait_time)
             await compile_pdfs(application.bot, chat_id)
 
-    threading.Thread(target=lambda: asyncio.run(scheduled_task()), daemon=True).start()
+    asyncio.create_task(scheduled_task())
 
 # Create the application and add handlers
 def main() -> None:
