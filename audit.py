@@ -93,11 +93,12 @@ async def compile_pdfs_task(context: ContextTypes.DEFAULT_TYPE):
 def schedule_compile_pdfs(application, chat_id):
     job_queue = application.job_queue
     job_queue.run_daily(
-        compile_pdfs_task,
-        time=time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
-        days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
-        context={'chat_id': chat_id}
-    )
+    compile_pdfs_task,
+    time=time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
+    days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
+    name=f'compile_pdfs_{chat_id}',
+    data={'chat_id': chat_id}
+)
 
 # Create the application and add handlers
 def main() -> None:
