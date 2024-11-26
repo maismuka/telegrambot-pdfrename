@@ -64,6 +64,7 @@ async def compile_pdfs(bot, chat_id) -> None:
         pdf_files = glob.glob(os.path.join(PDF_DIRECTORY, f"W-{today_str}-*.pdf"))
 
         if pdf_files:
+            print(f"Found PDF files for today: {pdf_files}")  # Debugging log
             # Create a ZIP file with all today's PDFs
             zip_file_name = f"Compiled-{today_str}.zip"
             zip_file_path = os.path.join(PDF_DIRECTORY, zip_file_name)
@@ -79,26 +80,31 @@ async def compile_pdfs(bot, chat_id) -> None:
             for pdf in pdf_files:
                 os.remove(pdf)
         else:
-            # No PDFs found for today
+            print("No PDF files found for today to compile.")  # Debugging log
             await bot.send_message(chat_id=chat_id, text="No PDFs found for today to compile.")
     except Exception as e:
         await bot.send_message(chat_id=chat_id, text=f"An error occurred while compiling PDFs: {str(e)}")
+        print(f"Error in compile_pdfs: {str(e)}")  # Debugging log
 
 # Scheduler function to run compile_pdfs at the specified time every day
 async def compile_pdfs_task(context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
-    chat_id = context.job.context['chat_id']
-    await compile_pdfs(bot, chat_id)
+    chat_id = context.job.data['chat_id']
+    try:
+        print(f"Running compile_pdfs_task at {datetime.utcnow()}")  # Debugging log
+        await compile_pdfs(bot, chat_id)
+    except Exception as e:
+        print(f"Error in compile_pdfs_task: {str(e)}")
 
 def schedule_compile_pdfs(application, chat_id):
     job_queue = application.job_queue
     job_queue.run_daily(
-    compile_pdfs_task,
-    time=time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
-    days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
-    name=f'compile_pdfs_{chat_id}',
-    data={'chat_id': chat_id}
-)
+        compile_pdfs_task,
+        time=time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
+        days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
+        name=f'compile_pdfs_{chat_id}',
+        data={'chat_id': chat_id}
+    )
 
 # Create the application and add handlers
 def main() -> None:
@@ -106,6 +112,12 @@ def main() -> None:
 
     # Add a handler to handle messages with PDF documents
     application.add_handler(MessageHandler(filters.Document.PDF, handle_document))
+
+    # Add a command handler to manually trigger the compilation (for testing purposes)
+    async def manual_compile_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        await compile_pdfs(context.bot, update.effective_chat.id)
+
+    application.add_handler(CommandHandler("compile", manual_compile_command))
 
     # Set up a scheduler to compile PDFs every day at the specified time
     chat_id = -1002145390528  # Replace with the chat ID where you want to send the compiled ZIP
