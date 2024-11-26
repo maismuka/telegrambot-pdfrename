@@ -9,7 +9,11 @@ import threading
 import time
 
 TOKEN = "7889731518:AAHZCHcFs7gWO1D56C5ptKjx1mvh8UbF1Fg"
-PDF_DIRECTORY = "/app"
+PDF_DIRECTORY = "/volume1/audit_temp"
+
+# Get scheduler time from environment variables (default to 23:50)
+SCHEDULE_HOUR = int(os.getenv("SCHEDULE_HOUR", 23))
+SCHEDULE_MINUTE = int(os.getenv("SCHEDULE_MINUTE", 50))
 
 # Ensure the directory exists
 if not os.path.exists(PDF_DIRECTORY):
@@ -79,12 +83,12 @@ async def compile_pdfs(bot, chat_id) -> None:
     except Exception as e:
         await bot.send_message(chat_id=chat_id, text=f"An error occurred while compiling PDFs: {str(e)}")
 
-# Scheduler function to run compile_pdfs at 23:50 every day
+# Scheduler function to run compile_pdfs at the specified time every day
 def schedule_compile_pdfs(application, chat_id):
     async def scheduled_task():
         while True:
             now = datetime.now()
-            target_time = now.replace(hour=23, minute=50, second=0, microsecond=0)
+            target_time = now.replace(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE, second=0, microsecond=0)
             if now > target_time:
                 target_time += timedelta(days=1)
             wait_time = (target_time - now).total_seconds()
@@ -100,7 +104,7 @@ def main() -> None:
     # Add a handler to handle messages with PDF documents
     application.add_handler(MessageHandler(filters.Document.PDF, handle_document))
 
-    # Set up a scheduler to compile PDFs every day at 23:50
+    # Set up a scheduler to compile PDFs every day at the specified time
     chat_id = -1002145390528  # Replace with the chat ID where you want to send the compiled ZIP
     schedule_compile_pdfs(application, chat_id)
 
