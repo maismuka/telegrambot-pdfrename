@@ -49,7 +49,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
             # Send the renamed file back to the user
             with open(new_file_path, 'rb') as pdf_file:
-                await message.reply_document(pdf_file, caption=f"File saved as: {new_file_name}\nCaption: {first_line}")
+                await message.reply_document(pdf_file, caption=f"{first_line}")
         except Exception as e:
             await message.reply_text(f"An error occurred: {str(e)}")
 
