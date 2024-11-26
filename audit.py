@@ -1,12 +1,12 @@
 import os
 import glob
 import zipfile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from telegram import Update, Document
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, JobQueue
 import asyncio
 import threading
-import time
+import time as t
 
 TOKEN = "7889731518:AAHZCHcFs7gWO1D56C5ptKjx1mvh8UbF1Fg"
 PDF_DIRECTORY = "/volume1/audit_temp"
@@ -94,14 +94,14 @@ def schedule_compile_pdfs(application, chat_id):
     job_queue = application.job_queue
     job_queue.run_daily(
         compile_pdfs_task,
-        time=datetime.time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
+        time=time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
         days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
         context={'chat_id': chat_id}
     )
 
 # Create the application and add handlers
 def main() -> None:
-    application = ApplicationBuilder().token(TOKEN).build()
+    application = ApplicationBuilder().token(TOKEN).post_init(lambda app: app.job_queue.start()).build()
 
     # Add a handler to handle messages with PDF documents
     application.add_handler(MessageHandler(filters.Document.PDF, handle_document))
