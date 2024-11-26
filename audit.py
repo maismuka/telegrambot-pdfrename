@@ -87,7 +87,7 @@ async def compile_pdfs(bot, chat_id) -> None:
 # Scheduler function to run compile_pdfs at the specified time every day
 async def compile_pdfs_task(context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
-    chat_id = context.job.chat_id
+    chat_id = context.job.context['chat_id']
     await compile_pdfs(bot, chat_id)
 
 def schedule_compile_pdfs(application, chat_id):
