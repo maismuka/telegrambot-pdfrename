@@ -13,5 +13,9 @@ RUN git clone https://github.com/maismuka/telegrambot-pdfrename.git /app
 # Install the specific version of python-telegram-bot
 RUN pip install --no-cache-dir python-telegram-bot==20.0
 
+# Set default environment variables for scheduler time
+ENV SCHEDULE_HOUR=23
+ENV SCHEDULE_MINUTE=50
+
 # Run the bot script
 CMD ["python", "./audit.py"]
