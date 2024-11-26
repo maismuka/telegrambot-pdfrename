@@ -30,7 +30,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if document.mime_type == 'application/pdf' and caption:
         try:
             # Extract current date and time
-            now = datetime.now()
+            now = datetime.utcnow() + timedelta(hours=8)
             date_str = now.strftime("%d%m%y")
             time_str = now.strftime("%H%M%S")
 
