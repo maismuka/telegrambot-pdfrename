@@ -3,7 +3,7 @@ import glob
 import zipfile
 from datetime import datetime, timedelta
 from telegram import Update, Document
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, JobQueue
 import asyncio
 import threading
 import time
@@ -57,14 +57,15 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def compile_pdfs(bot, chat_id) -> None:
     try:
         # Get today's date
-        today = datetime.utcnow() + timedelta(hours=8).strftime("%d%m%y")
+        today = datetime.utcnow() + timedelta(hours=8)
+        today_str = today.strftime("%d%m%y")
 
         # Find all PDF files for today in the specified directory
-        pdf_files = glob.glob(os.path.join(PDF_DIRECTORY, f"W-{today}-*.pdf"))
+        pdf_files = glob.glob(os.path.join(PDF_DIRECTORY, f"W-{today_str}-*.pdf"))
 
         if pdf_files:
             # Create a ZIP file with all today's PDFs
-            zip_file_name = f"Compiled-{today}.zip"
+            zip_file_name = f"Compiled-{today_str}.zip"
             zip_file_path = os.path.join(PDF_DIRECTORY, zip_file_name)
             with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for pdf in pdf_files:
@@ -72,7 +73,7 @@ async def compile_pdfs(bot, chat_id) -> None:
 
             # Send the ZIP file back to the chat
             with open(zip_file_path, 'rb') as zip_file:
-                await bot.send_document(chat_id=chat_id, document=zip_file, caption=f"Compiled ZIP for {today}")
+                await bot.send_document(chat_id=chat_id, document=zip_file, caption=f"Compiled ZIP for {today_str}")
 
             # Delete all the individual PDF files
             for pdf in pdf_files:
@@ -84,18 +85,19 @@ async def compile_pdfs(bot, chat_id) -> None:
         await bot.send_message(chat_id=chat_id, text=f"An error occurred while compiling PDFs: {str(e)}")
 
 # Scheduler function to run compile_pdfs at the specified time every day
-def schedule_compile_pdfs(application, chat_id):
-    async def scheduled_task():
-        while True:
-            now = datetime.now()
-            target_time = now.replace(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE, second=0, microsecond=0)
-            if now > target_time:
-                target_time += timedelta(days=1)
-            wait_time = (target_time - now).total_seconds()
-            await asyncio.sleep(wait_time)
-            await compile_pdfs(application.bot, chat_id)
+async def compile_pdfs_task(context: ContextTypes.DEFAULT_TYPE):
+    bot = context.bot
+    chat_id = context.job.chat_id
+    await compile_pdfs(bot, chat_id)
 
-    asyncio.create_task(scheduled_task())
+def schedule_compile_pdfs(application, chat_id):
+    job_queue = application.job_queue
+    job_queue.run_daily(
+        compile_pdfs_task,
+        time=datetime.time(hour=SCHEDULE_HOUR, minute=SCHEDULE_MINUTE),
+        days=(0, 1, 2, 3, 4, 5, 6),  # Every day of the week
+        context={'chat_id': chat_id}
+    )
 
 # Create the application and add handlers
 def main() -> None:
