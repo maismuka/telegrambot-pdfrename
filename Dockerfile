@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/maismuka/telegrambot-pdfrename.git /app
 
 # Set default environment variables for scheduler time
-ENV SCHEDULE_HOUR=15
-ENV SCHEDULE_MINUTE=52
+ENV SCHEDULE_HOUR=23
+ENV SCHEDULE_MINUTE=55
 
 # Install required packages
 RUN pip install --no-cache-dir python-telegram-bot
