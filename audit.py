@@ -9,6 +9,11 @@ import threading
 import time
 
 TOKEN = "7889731518:AAHZCHcFs7gWO1D56C5ptKjx1mvh8UbF1Fg"
+PDF_DIRECTORY = "/app"
+
+# Ensure the directory exists
+if not os.path.exists(PDF_DIRECTORY):
+    os.makedirs(PDF_DIRECTORY)
 
 # Define a function to handle PDF documents
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -32,13 +37,14 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
             # Generate the new file name
             new_file_name = f"W-{date_str}-{time_str}-{value}.pdf"
+            new_file_path = os.path.join(PDF_DIRECTORY, new_file_name)
 
             # Download the document and save it with the new file name
             file_path = await document.get_file()
-            await file_path.download_to_drive(new_file_name)
+            await file_path.download_to_drive(new_file_path)
 
             # Send the renamed file back to the user
-            with open(new_file_name, 'rb') as pdf_file:
+            with open(new_file_path, 'rb') as pdf_file:
                 await message.reply_document(pdf_file, caption=f"File saved as: {new_file_name}\nCaption: {first_line}")
         except Exception as e:
             await message.reply_text(f"An error occurred: {str(e)}")
@@ -49,18 +55,19 @@ async def compile_pdfs(bot, chat_id) -> None:
         # Get today's date
         today = datetime.now().strftime("%d%m%y")
 
-        # Find all PDF files for today
-        pdf_files = glob.glob(f"W-{today}-*.pdf")
+        # Find all PDF files for today in the specified directory
+        pdf_files = glob.glob(os.path.join(PDF_DIRECTORY, f"W-{today}-*.pdf"))
 
         if pdf_files:
             # Create a ZIP file with all today's PDFs
             zip_file_name = f"Compiled-{today}.zip"
-            with zipfile.ZipFile(zip_file_name, 'w') as zipf:
+            zip_file_path = os.path.join(PDF_DIRECTORY, zip_file_name)
+            with zipfile.ZipFile(zip_file_path, 'w') as zipf:
                 for pdf in pdf_files:
-                    zipf.write(pdf)
+                    zipf.write(pdf, os.path.basename(pdf))
 
             # Send the ZIP file back to the chat
-            with open(zip_file_name, 'rb') as zip_file:
+            with open(zip_file_path, 'rb') as zip_file:
                 await bot.send_document(chat_id=chat_id, document=zip_file, caption=f"Compiled ZIP for {today}")
 
             # Delete all the individual PDF files
