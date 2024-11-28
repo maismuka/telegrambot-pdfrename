@@ -11,9 +11,9 @@ import time as t
 TOKEN = "7889731518:AAHZCHcFs7gWO1D56C5ptKjx1mvh8UbF1Fg"
 PDF_DIRECTORY = "/volume1/audit_temp"
 
-# Get scheduler time from environment variables (default to 23:50)
+# Get scheduler time from environment variables (default to 23:00)
 SCHEDULE_HOUR = int(os.getenv("SCHEDULE_HOUR", 23))
-SCHEDULE_MINUTE = int(os.getenv("SCHEDULE_MINUTE", 50))
+SCHEDULE_MINUTE = int(os.getenv("SCHEDULE_MINUTE", 00))
 
 # Ensure the directory exists
 if not os.path.exists(PDF_DIRECTORY):
