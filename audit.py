@@ -120,7 +120,7 @@ def main() -> None:
     application.add_handler(CommandHandler("compile", manual_compile_command))
 
     # Set up a scheduler to compile PDFs every day at the specified time
-    chat_id = -1002145390528  # Replace with the chat ID where you want to send the compiled ZIP
+    chat_id = -1002365935364  # Replace with the chat ID where you want to send the compiled ZIP
     schedule_compile_pdfs(application, chat_id)
 
     # Run the bot
