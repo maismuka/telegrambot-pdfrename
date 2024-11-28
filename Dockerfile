@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir "python-telegram-bot[job-queue]"
 
 # Set default environment variables for scheduler time
 ENV SCHEDULE_HOUR=23
-ENV SCHEDULE_MINUTE=50
+ENV SCHEDULE_MINUTE=00
 
 # Run the bot script
 CMD ["python", "./audit.py"]
