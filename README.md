@@ -3,8 +3,10 @@ This telegram bot is to fetch any PDF in a group chat, download, then rename wit
 
 
 To rebuild everything, ensuring no old file or cache
+
 sudo docker build --no-cache -t telegrambot-audit .
 
 
 To run docker with mount to /volume1/audit_temp
+
 docker run -d -v /volume1/audit_temp:/volume1/audit_temp --name telegrambot-audit telegrambot-audit
