@@ -119,6 +119,15 @@ def main() -> None:
 
     application.add_handler(CommandHandler("compile", manual_compile_command))
 
+    # Add a command handler to test the bot's recognized current time
+    async def current_time_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        # Get the current time recognized by the bot
+        now = datetime.utcnow() + timedelta(hours=8)  # Adjust to your timezone
+        time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        await update.message.reply_text(f"The current recognized time is: {time_str}")
+
+    application.add_handler(CommandHandler("currenttime", current_time_command))
+
     # Set up a scheduler to compile PDFs every day at the specified time
     chat_id = -1002365935364  # Replace with the chat ID where you want to send the compiled ZIP
     schedule_compile_pdfs(application, chat_id)
