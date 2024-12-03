@@ -4,8 +4,10 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Install git and necessary packages
-RUN apt-get update && apt-get install -y git
+# Install git, tzdata, and necessary packages
+RUN apt-get update && apt-get install -y git tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime && \
+    echo "Asia/Kuala_Lumpur" > /etc/timezone
 
 # Clone the repository from GitHub
 RUN git clone https://github.com/maismuka/telegrambot-pdfrename.git /app
@@ -15,7 +17,7 @@ RUN pip install --no-cache-dir "python-telegram-bot[job-queue]"
 
 # Set default environment variables for scheduler time
 ENV SCHEDULE_HOUR=23
-ENV SCHEDULE_MINUTE=00
+ENV SCHEDULE_MINUTE=50
 
 # Run the bot script
 CMD ["python", "./audit.py"]
