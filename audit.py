@@ -6,7 +6,8 @@ from telegram import Update, Document
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import asyncio
 
-TOKEN = "7889731518:AAHZCHcFs7gWO1D56C5ptKjx1mvh8UbF1Fg"
+with open("newbotsecurity.txt", "r") as f:
+    TOKEN = f.read().strip()
 PDF_DIRECTORY = "/volume1/audit_temp"
 
 # Get scheduler time from environment variables (default to 23:50)
