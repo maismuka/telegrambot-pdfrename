@@ -103,21 +103,28 @@ def schedule_compile_pdfs(application, chat_id):
 def main() -> None:
     application = ApplicationBuilder().token(TOKEN).build()
 
-    # Add a handler to handle messages with PDF documents
+    # PDF document handler
     application.add_handler(MessageHandler(filters.Document.PDF, handle_document))
 
-    # Add a command handler to manually trigger the compilation (for testing purposes)
+    # /start command
+    async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        await update.message.reply_text("Hello! I'm alive and ready to rename your PDFs. Just send them with a caption!")
+
+    application.add_handler(CommandHandler("start", start_command))
+
+    # /compile command
     async def manual_compile_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await compile_pdfs(context.bot, update.effective_chat.id)
 
     application.add_handler(CommandHandler("compile", manual_compile_command))
 
-    # Set up a scheduler to compile PDFs every day at the specified time
-    chat_id = -1002145390528  # Replace with the chat ID where you want to send the compiled ZIP
+    # Schedule automatic compile
+    chat_id = -1002145390528
     schedule_compile_pdfs(application, chat_id)
 
-    # Run the bot
+    # Run bot
     application.run_polling()
+
 
 if __name__ == "__main__":
     main()
